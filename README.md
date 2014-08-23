@@ -4,7 +4,8 @@ A PHP convenience class for MySQL operations, based on mysqli.
 
 ## Usage
 
-```
+```PHP
+
 $CS = new ComfySQL(DBHOST, DBUSERNAME, DBPASSWORD, DBNAME);
 
 $value = $CS->dbgetsingle("select count(*) from Users");
@@ -34,6 +35,7 @@ $NumAffected = $CS->dbdo(
    array(1, array(2,5,9)),
    true
 );
+
 ```
 
 ## Notes
