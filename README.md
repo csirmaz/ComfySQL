@@ -10,18 +10,30 @@ $CS = new ComfySQL(DBHOST, DBUSERNAME, DBPASSWORD, DBNAME);
 $value = $CS->dbgetsingle("select count(*) from Users");
 $value = $CS->dbgetsingle("select count(*) from Users where ID > ?", array(12));
 
-$rows = $CS->dbgetall("select * from Users where Surname=? and Firstname=?", array("Smith", "John"));
+$rows = $CS->dbgetall(
+   "select * from Users where Surname=? and Firstname=?",
+   array("Smith", "John")
+);
 foreach($rows => $row) {
    print($row['ID'] . "\n");
 }
 
-$CS->dbgetcb("select count(*) from Users where ID in (?)", array(array(1,2,3,4)), function($r){
-   print($r['ID'] . "\n");
-   // Return false to stop the loop.
-});
+$CS->dbgetcb(
+   "select count(*) from Users where ID in (?)",
+   array(array(1,2,3,4)),
+   function($r) {
+      print($r['ID'] . "\n");
+      // Return false to stop the loop.
+   }
+);
 
 $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9)));
-$NumAffected = $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9)), true);
+
+$NumAffected = $CS->dbdo(
+   "update Users set Active=? where ID in (?)",
+   array(1, array(2,5,9)),
+   true
+);
 ```
 
 ## Notes
