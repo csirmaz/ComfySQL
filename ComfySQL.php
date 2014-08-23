@@ -48,7 +48,7 @@ THE SOFTWARE.
    });
 
    $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9)));
-   $NoAffected = $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9)), true);
+   $NumAffected = $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9)), true);
 
    Notes
    ----------
@@ -67,24 +67,22 @@ THE SOFTWARE.
 
 class ComfySQL {
 
-   private $h; /** < mysqli object */
-   private $bindparam;
-   private $bindresult;
+   private $h; /*< mysqli object */
 
    /** $CS = new ComfySQL(DBHOST, DBUSERNAME, DBPASSWORD, DBNAME); */
-   public function __construct($host, $username, $password, $database){
+   public function __construct($host, $username, $password, $database) {
       $this->h = new mysqli($host, $username, $password, $database);
-      if($this->h->connect_errno){
+      if ($this->h->connect_errno) {
          throw new ComfySQL_Exception($this->h->connect_errno, $this->h->connect_error, 'connect');
       }
    }
 
-   public function __destruct(){
+   public function __destruct() {
       // Kill the thread
-      if(! $this->h->kill( $this->h->thread_id ) ){
+      if (!$this->h->kill($this->h->thread_id)) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, 'db/kill(close)');
       }
-      if(! $this->h->close()){
+      if (!$this->h->close()) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, 'db/close');
       }
    }
@@ -92,9 +90,9 @@ class ComfySQL {
    /** Performs a query with a result set, and returns a single value. */
    /** $value = $CS->dbgetsingle("select count(*) from Users"); */
    /** $value = $CS->dbgetsingle("select count(*) from Users where ID > ?", array(12)); */
-   public function dbgetsingle($query, $args = array()){
+   public function dbgetsingle($query, $args = array()) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
-      if($data === false){
+      if ($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
 
@@ -105,14 +103,14 @@ class ComfySQL {
 
    /** Performs a query with a result set, and returns all rows as associative arrays. */
    /** $rows = $CS->dbgetall("select * from Users where Surname=? and Firstname=?", array("Smith", "John")); */
-   public function dbgetall($query, $args = array()){
+   public function dbgetall($query, $args = array()) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
-      if($data === false){
+      if ($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
 
       $out = array();
-      while($row = $data->fetch_assoc()){
+      while ($row = $data->fetch_assoc()) {
          array_push($out, $row);
       }
       $data->free();
@@ -121,17 +119,20 @@ class ComfySQL {
 
    /** Gets rows with a callback, called with an associative array. Return false from the callback to stop. the loop. */
    /** $CS->dbgetcb("select count(*) from Users where ID in (?)", array(array(1,2,3,4)), function($r){
-          print($r['ID'] . "\n");
-          // Return false to stop the loop.
-       }); */
-   public function dbgetcb($query, $args = array(), $callback){
+    *     print($r['ID'] . "\n");
+    *     // Return false to stop the loop.
+    *  });
+    */
+   public function dbgetcb($query, $args = array(), $callback) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
-      if($data === false){
+      if ($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
 
-      while($row = $data->fetch_assoc()){
-         if($callback($row) === false){ break; }
+      while ($row = $data->fetch_assoc()) {
+         if ($callback($row) === false) {
+            break;
+         }
       }
       $data->free();
       return;
@@ -139,12 +140,14 @@ class ComfySQL {
 
    /** Performs a query without a result set. Returns the number of rows affected if $returnaffectedrows. */
    /** $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9))); */
-   /** $NoAffected = $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9)), true); */
-   public function dbdo($query, $args = array(), $returnaffectedrows = false){
-      if($this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT) === false){
+   /** $NumAffected = $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9)), true); */
+   public function dbdo($query, $args = array(), $returnaffectedrows = false) {
+      if ($this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT) === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
-      if(!$returnaffectedrows){ return; }
+      if (!$returnaffectedrows) {
+         return;
+      }
       return $this->h->affected_rows;
    }
 
@@ -156,16 +159,23 @@ class ComfySQL {
    values and the output variables, the reflection class to call bind_param and
    bind_result, etc.
    */
-   private function encode($query, $args){
+   private function encode($query, $args) {
       $p = 0;
       $o = '';
-      return preg_replace_callback('/\?/', function($matches) use(&$p, $args){
-         $v = $args[$p++];
-         if(is_array($v)){
-            return implode(',', array_map(function($e){ return '"'.$this->h->real_escape_string($e).'"';}, $v));
-         }
-         return '"'.$this->h->real_escape_string($v).'"';
-      }, $query);
+      return preg_replace_callback(
+         '/\?/',
+         function ($matches) use (&$p, $args) {
+            $v = $args[$p++];
+            if (is_array($v)) {
+               return implode(
+                  ',',
+                  array_map(function ($e) { return '"' . $this->h->real_escape_string($e) . '"'; }, $v)
+               );
+            }
+            return '"' . $this->h->real_escape_string($v) . '"';
+         },
+         $query
+      );
    }
 
 }
@@ -175,18 +185,24 @@ class ComfySQL_Exception extends Exception {
    private $errno;
    private $errstr;
 
-   public function __construct($errno, $errstr, $context){
+   public function __construct($errno, $errstr, $context) {
       $this->errno = $errno;
       $this->error = $error;
-      $msg = '<'.$errno.'=='.$errstr.'> [['.$context.']]';
+      $msg = '<' . $errno . '==' . $errstr . '> [[' . $context . ']]';
       parent::__construct($msg);
    }
 
-   public function errno(){ return $this->errno; }
+   public function errno() {
+      return $this->errno;
+   }
 
-   public function errstr(){ return $this->errstr; }
+   public function errstr() {
+      return $this->errstr;
+   }
 
-   public function context(){ return $this->context; }
+   public function context() {
+      return $this->context;
+   }
 
 }
 
