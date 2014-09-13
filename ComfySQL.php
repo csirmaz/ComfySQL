@@ -74,17 +74,17 @@ class ComfySQL {
    /** $CS = new ComfySQL(DBHOST, DBUSERNAME, DBPASSWORD, DBNAME); */
    public function __construct($host, $username, $password, $database) {
       $this->h = new mysqli($host, $username, $password, $database);
-      if ($this->h->connect_errno) {
+      if($this->h->connect_errno) {
          throw new ComfySQL_Exception($this->h->connect_errno, $this->h->connect_error, 'connect');
       }
    }
 
    public function __destruct() {
       // Kill the thread
-      if (!$this->h->kill($this->h->thread_id)) {
+      if(!$this->h->kill($this->h->thread_id)) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, 'db/kill(close)');
       }
-      if (!$this->h->close()) {
+      if(!$this->h->close()) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, 'db/close');
       }
    }
@@ -94,7 +94,7 @@ class ComfySQL {
    /** $value = $CS->dbgetsingle("select count(*) from Users where ID > ?", array(12)); */
    public function dbgetsingle($query, $args = array()) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
-      if ($data === false) {
+      if($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
 
@@ -109,7 +109,7 @@ class ComfySQL {
    /** $row = $CS->dbgetrow("select * from Users where ID=?", array(12)); */
    public function dbgetrow($query, $args = array()) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
-      if ($data === false) {
+      if($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
 
@@ -122,12 +122,12 @@ class ComfySQL {
    /** $rows = $CS->dbgetall("select * from Users where Surname=? and Firstname=?", array("Smith", "John")); */
    public function dbgetall($query, $args = array()) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
-      if ($data === false) {
+      if($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
 
       $out = array();
-      while ($row = $data->fetch_assoc()) {
+      while($row = $data->fetch_assoc()) {
          array_push($out, $row);
       }
       $data->free();
@@ -142,12 +142,12 @@ class ComfySQL {
     */
    public function dbgetcb($query, $args = array(), $callback) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
-      if ($data === false) {
+      if($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
 
-      while ($row = $data->fetch_assoc()) {
-         if ($callback($row) === false) {
+      while($row = $data->fetch_assoc()) {
+         if($callback($row) === false) {
             break;
          }
       }
@@ -159,10 +159,10 @@ class ComfySQL {
    /** $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9))); */
    /** $NumAffected = $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9)), true); */
    public function dbdo($query, $args = array(), $returnaffectedrows = false) {
-      if ($this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT) === false) {
+      if($this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT) === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
-      if (!$returnaffectedrows) {
+      if(!$returnaffectedrows) {
          return;
       }
       return $this->h->affected_rows;
@@ -183,7 +183,7 @@ class ComfySQL {
          '/\?/',
          function ($matches) use (&$p, $args) {
             $v = $args[$p++];
-            if (is_array($v)) {
+            if(is_array($v)) {
                return implode(
                   ',',
                   array_map(function ($e) { return '"' . $this->h->real_escape_string($e) . '"'; }, $v)
