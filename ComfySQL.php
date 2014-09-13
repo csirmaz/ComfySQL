@@ -37,6 +37,8 @@ THE SOFTWARE.
    $value = $CS->dbgetsingle("select count(*) from Users");
    $value = $CS->dbgetsingle("select count(*) from Users where ID > ?", array(12));
 
+   $row = $CS->dbgetrow("select * from Users where ID=?", array(12));
+
    $rows = $CS->dbgetall("select * from Users where Surname=? and Firstname=?", array("Smith", "John"));
    foreach($rows => $row) {
       print($row['ID'] . "\n");
@@ -87,7 +89,7 @@ class ComfySQL {
       }
    }
 
-   /** Performs a query with a result set, and returns a single value. */
+   /** Performs a query with a result set, and returns a single value, or null if no row matched. */
    /** $value = $CS->dbgetsingle("select count(*) from Users"); */
    /** $value = $CS->dbgetsingle("select count(*) from Users where ID > ?", array(12)); */
    public function dbgetsingle($query, $args = array()) {
@@ -98,7 +100,22 @@ class ComfySQL {
 
       $out = $data->fetch_row();
       $data->free();
-      return $out[0];
+      return ($out === null ? null : $out[0]);
+   }
+
+   /** Performs a query with a result set, and returns a single row as an associative array,
+    * or null if no row matched.
+    */
+   /** $row = $CS->dbgetrow("select * from Users where ID=?", array(12)); */
+   public function dbgetrow($query, $args = array()) {
+      $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
+      if ($data === false) {
+         throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
+      }
+
+      $row = $data->fetch_assoc();
+      $data->free();
+      return $row;
    }
 
    /** Performs a query with a result set, and returns all rows as associative arrays. */
@@ -187,7 +204,7 @@ class ComfySQL_Exception extends Exception {
 
    public function __construct($errno, $errstr, $context) {
       $this->errno = $errno;
-      $this->error = $error;
+      $this->errstr = $errstr;
       $msg = '<' . $errno . '==' . $errstr . '> [[' . $context . ']]';
       parent::__construct($msg);
    }
