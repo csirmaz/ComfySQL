@@ -57,7 +57,7 @@ class ComfySQL {
    /** Performs a query with a result set, and returns a single value, or null if no row matched. */
    /** $value = $CS->dbgetsingle("select count(*) from Users"); */
    /** $value = $CS->dbgetsingle("select count(*) from Users where ID > ?", array(12)); */
-   public function dbgetsingle($query, $args = array()) {
+   public function dbgetsingle($query, $args = null) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
       if($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
@@ -72,7 +72,7 @@ class ComfySQL {
     * or null if no row matched.
     */
    /** $row = $CS->dbgetrow("select * from Users where ID=?", array(12)); */
-   public function dbgetrow($query, $args = array()) {
+   public function dbgetrow($query, $args = null) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
       if($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
@@ -85,7 +85,7 @@ class ComfySQL {
 
    /** Performs a query with a result set, and returns all rows as associative arrays. */
    /** $rows = $CS->dbgetall("select * from Users where Surname=? and Firstname=?", array("Smith", "John")); */
-   public function dbgetall($query, $args = array()) {
+   public function dbgetall($query, $args = null) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
       if($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
@@ -105,7 +105,7 @@ class ComfySQL {
     *     // Return false to stop the loop.
     *  });
     */
-   public function dbgetcb($query, $args = array(), $callback) {
+   public function dbgetcb($query, $args = null, $callback) {
       $data = $this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT);
       if($data === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
@@ -122,7 +122,7 @@ class ComfySQL {
 
    /** Performs a query without a result set. */
    /** $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9))); */
-   public function dbdo($query, $args = array(), $returnaffectedrows = false) {
+   public function dbdo($query, $args = null, $returnaffectedrows = false) {
       if($this->h->query($this->encode($query, $args), MYSQLI_STORE_RESULT) === false) {
          throw new ComfySQL_Exception($this->h->errno, $this->h->error, $query);
       }
