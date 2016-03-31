@@ -23,7 +23,8 @@ foreach($rows => $row) {
    print($row['ID'] . "\n");
 }
 
-// Gets rows with a callback, called with an associative array. Return false from the callback to stop the loop.
+// Gets rows with a callback, called with an associative array. Return false from the callback 
+// to stop the loop.
 $CS->dbgetcb("select count(*) from Users where ID in (?)", array(array(1,2,3,4)), function($r){
    print($r['ID'] . "\n");
    // Return false to stop the loop.
