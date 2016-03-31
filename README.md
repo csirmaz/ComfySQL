@@ -6,27 +6,35 @@ A PHP convenience class for MySQL operations, based on mysqli.
 
 ```PHP
 
+// Create a connection
 $CS = new ComfySQL(DBHOST, DBUSERNAME, DBPASSWORD, DBNAME);
 
+// Get a single value
 $value = $CS->dbgetsingle("select count(*) from Users");
 $value = $CS->dbgetsingle("select count(*) from Users where ID > ?", array(12));
 
+// Get a single row where columns are represented as associative arrays
 $row = $CS->dbgetrow("select * from Users where ID=?", array(12));
 
+// Get all rows as an array
 $rows = $CS->dbgetall("select * from Users where Surname=? and Firstname=?", array("Smith", "John"));
 foreach($rows => $row) {
    print($row['ID'] . "\n");
 }
 
+// Call a callback function on all rows returned
 $CS->dbgetcb("select count(*) from Users where ID in (?)", array(array(1,2,3,4)), function($r){
    print($r['ID'] . "\n");
    // Return false to stop the loop.
 });
 
+// Perform an action that has no results
 $CS->dbdo("update Users set Active=? where ID in (?)", array(1, array(2,5,9)));
 
+// Get the number of affected rows
 $NumAffected = $CS->get_affected_rows();
 
+// Get the latest autoincrement ID inserted
 $InsertId = $CS->get_insert_id();
 
 ```
